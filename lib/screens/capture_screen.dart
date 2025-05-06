@@ -4,11 +4,13 @@ import 'package:image_picker/image_picker.dart';
 import '../services/image_service.dart';
 import '../utils/preprocessing.dart';
 import '../utils/mlkit_bubble_detection.dart';
-import '../utils/scantron_alignment.dart'; // ← Alignment added
+import '../utils/scantron_alignment.dart';
 import '../utils/answer_key_storage.dart';
 import '../utils/scan_history_storage.dart';
 import '../models/scan_history_entry.dart';
-import 'answer_key_screen.dart';
+import '../utils/aspect_ratio_cropper.dart'; // ✅ New import
+import '../services/tflite_service.dart';
+
 
 class CaptureScreen extends StatefulWidget {
   @override
@@ -31,10 +33,10 @@ class _CaptureScreenState extends State<CaptureScreen> {
 
   @override
   void initState() {
-  super.initState();
-  _loadAvailableKeys();
-  TFLiteService().loadModel(); // 👈 This line ensures YOLO model is ready
- } 
+    super.initState();
+    _loadAvailableKeys();
+    TFLiteService().loadModel(); // Load YOLO model
+  }
 
   Future<void> _loadAvailableKeys() async {
     final keys = await AnswerKeyStorage.listKeys();
@@ -70,8 +72,9 @@ class _CaptureScreenState extends State<CaptureScreen> {
     final pickedFront = await ImageService.pickImage(source);
     if (pickedFront == null) return;
 
-    final alignedFront = await alignAndCropScantronImage(pickedFront); // ✅ apply crop
-    setState(() => _imageFileFront = alignedFront); // ✅ show cropped
+    final croppedFront = await cropToScantronAspectRatio(pickedFront); // ✅ Aspect crop
+    final alignedFront = await alignAndCropScantronImage(croppedFront);  // ✅ ML alignment
+    setState(() => _imageFileFront = alignedFront);
 
     final detectedFront = await detectBubblesWithMLKit(alignedFront, _maxQuestions);
     Map<int, String> detectedAll = Map.from(detectedFront);
@@ -82,8 +85,9 @@ class _CaptureScreenState extends State<CaptureScreen> {
       final pickedBack = await ImageService.pickImage(source);
       if (pickedBack == null) return;
 
-      alignedBack = await alignAndCropScantronImage(pickedBack); // ✅ apply crop
-      setState(() => _imageFileBack = alignedBack); // ✅ show cropped
+      final croppedBack = await cropToScantronAspectRatio(pickedBack); // ✅ Aspect crop
+      alignedBack = await alignAndCropScantronImage(croppedBack);      // ✅ ML alignment
+      setState(() => _imageFileBack = alignedBack);
 
       final detectedBack = await detectBubblesWithMLKit(alignedBack, _maxQuestions);
       detectedBack.forEach((k, v) {

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
-import 'tflite_service.dart';
+import '../services/tflite_service.dart';
 
 /// Aligns and crops scantron using actual YOLOv8 model output
 Future<File> alignAndCropScantronImage(File imageFile) async {
@@ -44,7 +44,14 @@ Future<File> alignAndCropScantronImage(File imageFile) async {
   cropWidth = cropWidth.clamp(32, width - cropLeft);
   cropHeight = cropHeight.clamp(32, height - cropTop);
 
-  final cropped = img.copyCrop(original, cropLeft, cropTop, cropWidth, cropHeight);
+  final cropped = img.copyCrop(
+    original,
+    x: cropLeft,
+    y: cropTop,
+    width: cropWidth,
+    height: cropHeight,
+  );
+
   print("📐 Crop: left=$cropLeft, top=$cropTop, width=$cropWidth, height=$cropHeight");
 
   // Save to temp
@@ -55,3 +62,4 @@ Future<File> alignAndCropScantronImage(File imageFile) async {
   print("✅ Cropped saved to: $outPath");
   return outFile;
 }
+
