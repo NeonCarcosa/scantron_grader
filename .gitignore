@@ -1,0 +1,28 @@
+# Flutter/Dart/Pub related
+.dart_tool/
+.packages
+.pub/
+build/
+**/GeneratedPluginRegistrant.java
+**/GeneratedPluginRegistrant.swift
+
+# IDEs and editors
+.idea/
+.vs/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Android/iOS native files
+android/.gradle
+android/app/build
+ios/Pods
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# Ignore nested repos and unnecessary folders
+yolov8/
+yoloenv/
+
